@@ -64,7 +64,14 @@ class ImageRecommendation:
             .withColumnRenamed("image", "image_id")
             .withColumn("confidence_rating", self.confidence_rating)
             .withColumn("source", self.source)
-            .select("wiki", "page_id", "image_id", "confidence_rating", "source")
+            .select(
+                "wiki",
+                "page_id",
+                "page_title",
+                "image_id",
+                "confidence_rating",
+                "source",
+            )
         )
 
 

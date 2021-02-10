@@ -14,6 +14,7 @@ USE ${hiveconf:username};
 CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
   `wiki` string,
   `page_id` string,
+  `page_title` string,
   `image_id` string,
   `confidence_rating` string,
   `source` string,
