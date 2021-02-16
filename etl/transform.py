@@ -53,7 +53,8 @@ class ImageRecommendation:
 
     def transform(self) -> DataFrame:
         return (
-            self.dataFrame.withColumn(
+            self.dataFrame.where(~F.col("top_candidates").isNull())
+            .withColumn(
                 "data",
                 F.explode(
                     F.from_json("top_candidates", RawDataset.recommendation_schema)
@@ -71,6 +72,21 @@ class ImageRecommendation:
                 "image_id",
                 "confidence_rating",
                 "source",
+            )
+            .union(
+                self.dataFrame.where(F.col("top_candidates").isNull())
+                .withColumnRenamed("wiki_db", "wiki")
+                .withColumn("image_id", F.lit(None))
+                .withColumn("confidence_rating", F.lit(None))
+                .withColumn("source", F.lit(None))
+                .select(
+                    "wiki",
+                    "page_id",
+                    "page_title",
+                    "image_id",
+                    "confidence_rating",
+                    "source",
+                )
             )
         )
 
