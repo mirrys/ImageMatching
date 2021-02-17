@@ -52,7 +52,7 @@ class ImageRecommendation:
             )
 
     def transform(self) -> DataFrame:
-        return (
+        with_recommendations = (
             self.dataFrame.where(~F.col("top_candidates").isNull())
             .withColumn(
                 "data",
@@ -73,22 +73,23 @@ class ImageRecommendation:
                 "confidence_rating",
                 "source",
             )
-            .union(
-                self.dataFrame.where(F.col("top_candidates").isNull())
-                .withColumnRenamed("wiki_db", "wiki")
-                .withColumn("image_id", F.lit(None))
-                .withColumn("confidence_rating", F.lit(None))
-                .withColumn("source", F.lit(None))
-                .select(
-                    "wiki",
-                    "page_id",
-                    "page_title",
-                    "image_id",
-                    "confidence_rating",
-                    "source",
-                )
+        )
+        without_recommendations = (
+            self.dataFrame.where(F.col("top_candidates").isNull())
+            .withColumnRenamed("wiki_db", "wiki")
+            .withColumn("image_id", F.lit(None))
+            .withColumn("confidence_rating", F.lit(None))
+            .withColumn("source", F.lit(None))
+            .select(
+                "wiki",
+                "page_id",
+                "page_title",
+                "image_id",
+                "confidence_rating",
+                "source",
             )
         )
+        return with_recommendations.union(without_recommendations)
 
 
 if __name__ == "__main__":
