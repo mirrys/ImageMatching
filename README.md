@@ -55,7 +55,7 @@ spark2-submit etl/transform.py <raw data> <production data>
 `conf/spark.properties` provides default settings to run the ETL as a [regular size spark job](https://wikitech.wikimedia.org/wiki/Analytics/Systems/Cluster/Spark#Spark_Resource_Settings) on WMF's Analytics cluster.
 
 ```python
-spark2-submit --properties-file etl/transform.py <raw data> <production data>
+spark2-submit --properties-file conf/spark.properties etl/transform.py <raw data> <production data>
 ```
 
 ## Metrics collection
