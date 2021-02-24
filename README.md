@@ -66,7 +66,7 @@ metrics files, that outpus to the driver and executors stdout, can be found at `
 The easiest way to do it by setting `PYSPARK_SUBMISSION_ARGS`. For example
 ```bash
 export PYSPARK_SUBMIT_ARGS="--files ./conf/metrics.properties --conf spark.metrics.conf=metrics.properties pyspark-shell"
-python3 algorunner.py 2020-12-28 hywiki Outputpython3 algorunner.py 2020-12-28 hywiki Output
+python3 algorunner.py 2020-12-28 hywiki Output
 ```
 Will submit the `algorunner` job, with additional instrumentation.
 
