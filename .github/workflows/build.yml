@@ -33,7 +33,7 @@ jobs:
         java-version: adopt@1.8
     - name: Install Spark 
       run: |
-	make install_spark
+        make install_spark
     - name: Test with pytest
       run: |
-	make test
+        make test
