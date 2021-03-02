@@ -17,23 +17,19 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install build dependencies
+    - name: Install dependencies
       run: |
-        pip install -r requirements.txt
-        pip install -e .
-    - name: Lint code with flake8
-      run: |
-        pip install flake8==3.8
-        # stop the build if there are Python syntax errors or undefined names in *.py files
-        flake8 *.py etl/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 *.py etl/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        make venv
     - uses: olafurpg/setup-scala@v10
       with:
         java-version: adopt@1.8
-    - name: Install Spark 
+    - name: Install Apache Spark
       run: |
+        # This command will install vanilla spark under ./spark-2.4.7-bin-hadoop2.7
         make install_spark
     - name: Test with pytest
       run: |
+        export SPARK_HOME=$(pwd)/spark-2.4.7-bin-hadoop2.7
+        export PYTHONPATH=${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip:${PYTHONPATH}
+        export PATH=${PATH}:${SPARK_HOME}/bin:${SPARK_HOME}/sbin
         make test
