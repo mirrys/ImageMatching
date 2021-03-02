@@ -1,3 +1,5 @@
+![](https://github.com/mirrys/ImageMatching/workflows/build/badge.svg)
+
 # ImageMatching
 Image recommendation for unillustrated Wikipedia articles
 
