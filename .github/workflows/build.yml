@@ -20,6 +20,9 @@ jobs:
     - name: Install dependencies
       run: |
         make venv
+    - name: Lint python files with flake8
+      run: |
+        make flake8
     - uses: olafurpg/setup-scala@v10
       with:
         java-version: adopt@1.8
