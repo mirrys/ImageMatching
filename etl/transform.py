@@ -93,13 +93,14 @@ class ImageRecommendation:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print(
-            """Usage: spark-submit transform.py <source csv file> <destination csv file>"""
+            """Usage: spark-submit transform.py <snapshot> <source csv file> <destination csv file>"""
         )
         sys.exit(1)
-    source = sys.argv[1]
-    destination = sys.argv[2]
+    snapshot = sys.argv[1]
+    source = sys.argv[2]
+    destination = sys.argv[3]
     df = (
         spark.read.options(delimiter="\t", header=False)
         .schema(RawDataset.schema)
@@ -112,6 +113,8 @@ if __name__ == "__main__":
         .transform()
         .withColumn("dataset_id", F.lit(dataset_id))
         .withColumn("insertion_ts", F.lit(insertion_ts))
+        .sort(F.desc("page_title"))
         .write.options(delimiter="\t", header=False)
+        .partitionBy("wiki")
         .csv(destination)
     )
