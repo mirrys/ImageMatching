@@ -80,14 +80,17 @@ done
 	echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 # 4. Submit the Spark production data ETL
 echo "Generating production data"
-hadoop fs -rm -r imagerec_prod/data/
 
 ## Generate spark config
 spark_config=$runs/$run_id/regular.spark.properties
 cat conf/spark.properties.template /usr/lib/spark2/conf/spark-defaults.conf > ${spark_config}
 
 STARTTIME=${SECONDS}
-spark2-submit --properties-file ${spark_config} etl/transform.py ${monthly_snapshot} imagerec/data/ imagerec_prod/data/
+spark2-submit --properties-file ${spark_config} etl/transform.py \
+	--snapshot ${monthly_snapshot} \
+	--source imagerec/data/ \
+	--destination imagerec_prod/data/ \
+	--dataset-id ${run_id}
 ENDTIME=${SECONDS}
 metric_name=metrics.etl.transfrom.${snapshot}.second
 timestamp=$(date +%s)
@@ -106,7 +109,7 @@ echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 STARTIME=${SECONDS}
 mkdir ${outputdir}
 for wiki in ${wikis}; do
-	hive -hiveconf username=${username} -hiveconf wiki=${wiki} -f ddl/export_prod_data.hql > ${outputdir}/prod-${wiki}-${snapshot}-wd_image_candidates.tsv
+	hive -hiveconf username=${username} -hiveconf wiki=${wiki} -hiveconf snapshot=${monthly_snapshot} -f ddl/export_prod_data.hql > ${outputdir}/prod-${wiki}-${snapshot}-wd_image_candidates.tsv
 done
 ENDTIME=${SECONDS}
 echo "Datasets are available at $outputdir/"

@@ -3,6 +3,7 @@ from pyspark.sql.types import ArrayType, StructType, StringType, DoubleType, Int
 from pyspark.sql import Column, DataFrame
 from pyspark.sql import functions as F
 
+import argparse
 import sys
 import uuid
 import datetime
@@ -91,30 +92,39 @@ class ImageRecommendation:
         )
         return with_recommendations.union(without_recommendations)
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Transform raw algo output to production datasets')
+    parser.add_argument('--snapshot', help='Montlhy snapshot date (YYYY-MM)')
+    parser.add_argument('--source', help='Source dataset path')
+    parser.add_argument('--destination', help='Destination path')
+    parser.add_argument('--dataset-id', help='Production dataset identifier (optional)', default=str(uuid.uuid4), dest='dataset_id')    
+    
+    return parser.parse_args()
+
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print(
-            """Usage: spark-submit transform.py <snapshot> <source csv file> <destination csv file>"""
-        )
-        sys.exit(1)
-    snapshot = sys.argv[1]
-    source = sys.argv[2]
-    destination = sys.argv[3]
+    args = parse_args()
+
+    snapshot = args.snapshot
+    source = args.source
+    destination = args.destination
+    dataset_id = args.dataset_id
+
     df = (
         spark.read.options(delimiter="\t", header=False)
         .schema(RawDataset.schema)
         .csv(source)
     )
-    dataset_id = str(uuid.uuid4())
     insertion_ts = datetime.datetime.now().timestamp()
     (
         ImageRecommendation(df)
         .transform()
         .withColumn("dataset_id", F.lit(dataset_id))
         .withColumn("insertion_ts", F.lit(insertion_ts))
+        .withColumn("snapshot", F.lit(snapshot))
         .sort(F.desc("page_title"))
         .write.options(delimiter="\t", header=False)
-        .partitionBy("wiki")
+        .partitionBy("wiki", "snapshot")
+        .mode('overwrite') # Requires dynamic partitioning enabled
         .csv(destination)
     )
