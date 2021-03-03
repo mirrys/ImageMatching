@@ -27,9 +27,9 @@ class RawDataset:
 
 class ImageRecommendation:
     confidence_rating: Column = (
-        F.when(F.col("rating").cast(IntegerType()) == 1, F.lit("low"))
+        F.when(F.col("rating").cast(IntegerType()) == 1, F.lit("high"))
         .when(F.col("rating").cast(IntegerType()) == 2, F.lit("medium"))
-        .when(F.col("rating").cast(IntegerType()) == 3, F.lit("high"))
+        .when(F.col("rating").cast(IntegerType()) == 3, F.lit("low"))
     )
     source: Column = (
         F.when(
