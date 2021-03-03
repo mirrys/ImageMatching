@@ -27,10 +27,10 @@ monthly_snapshot=$(echo ${snapshot} | awk -F'-' '{print $1"-"$2}')
 username=$(whoami)
 
 # Path were raw dataset (Jupyter algo output) will be stored
-algo_outputdir=${run_id}/Output
+algo_outputdir=runs/${run_id}/Output
 
 # Path on the local filesystem where production datasets will be stored.
-outputdir=${run_id}/imagerec_prod_${snapshot}
+outputdir=runs/${run_id}/imagerec_prod_${snapshot}
 
 source venv/bin/activate
 
@@ -49,32 +49,35 @@ $(pwd)/runs/${run_id}"
 for wiki in ${wikis}; do
 	# 1. Run the algo and generate data locally
 	echo "Generating recommendations for ${wiki}"
-	STARTIME=${SECONDS}
+	STARTTIME=${SECONDS}
 	python algorunner.py ${snapshot} ${wiki} ${algo_outputdir}
 	ENDTIME=${SECONDS}
-	metric_name=${metrics.algorunner.${wiki}.${snapshot}.seconds}
-	echo "${metric_name},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+	metric_name=metrics.algorunner.${wiki}.${snapshot}.seconds
+        timestamp=$(date +%s)
+	echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 	
 
 	# 2. Upload to HDFS
         echo "Publishing raw data to HDFS for ${wiki}"
-	STARTIME=${SECONDS}
+	STARTTIME=${SECONDS}
 	hadoop fs -rm -r imagerec/data/wiki_db=${wiki}/snapshot=${monthly_snapshot}/
 	hadoop fs -mkdir -p imagerec/data/wiki_db=${wiki}/snapshot=${monthly_snapshot}/
 
 	hadoop fs -copyFromLocal ${algo_outputdir}/${wiki}_${snapshot}_wd_image_candidates.tsv imagerec/data/wiki_db=${wiki}/snapshot=${monthly_snapshot}/
 	ENDTIME=${SECONDS}
 	metric_name=metrics.hdfs.copyrawdata.${wiki}.${snapshot}.seconds
-	echo "${metric_name},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+        timestamp=$(date +%s)
+	echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 
 	# 3. Update hive external table metadata
 	echo "Updating Hive medatada for ${wiki}" 
-	STARTIME=${SECONDS}
+	STARTTIME=${SECONDS}
 	hive -hiveconf username=${username} -f ddl/external_imagerec.hql
 done
 	ENDTIME=${SECONDS}
+	timestamp=$(date +%s)
 	metric_name=metrics.hive.imagerec.${wiki}.${snapshot}.seconds
-	echo "${metric_name},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+	echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 # 4. Submit the Spark production data ETL
 echo "Generating production data"
 hadoop fs -rm -r imagerec_prod/data/
@@ -83,27 +86,30 @@ hadoop fs -rm -r imagerec_prod/data/
 spark_config=$runs/$run_id/regular.spark.properties
 cat conf/spark.properties.template /usr/lib/spark2/conf/spark-defaults.conf > ${spark_config}
 
-STARTIME=${SECONDS}
+STARTTIME=${SECONDS}
 spark2-submit --properties-file ${spark_config} etl/transform.py ${monthly_snapshot} imagerec/data/ imagerec_prod/data/
 ENDTIME=${SECONDS}
 metric_name=metrics.etl.transfrom.${snapshot}.second
-echo "${metric_name},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+timestamp=$(date +%s)
+echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 
 
 # 5. Update hive external table metadata (production)
-STARTIME=${SECONDS}
+STARTTIME=${SECONDS}
 hive -hiveconf username=${username} -f ddl/external_imagerec_prod.hql
 ENDTIME=${SECONDS}
 metric_name=hive.imagerec_prod.${snapshot}
-echo "hive.imagerec_prod.${snapshot},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+timestamp=$(date +%s)
+echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 
 # 6. Export production datasets
 STARTIME=${SECONDS}
 mkdir ${outputdir}
 for wiki in ${wikis}; do
-	hive -hiveconf username=${username} -hiveconf wiki=${wiki} -f export_prod_data.hql > ${outputdir}/prod-${wiki}-${snapshot}-wd_image_candidates.tsv
+	hive -hiveconf username=${username} -hiveconf wiki=${wiki} -f ddl/export_prod_data.hql > ${outputdir}/prod-${wiki}-${snapshot}-wd_image_candidates.tsv
 done
 ENDTIME=${SECONDS}
 echo "Datasets are available at $outputdir/"
 metric_name=metrics.etl.export_prod_data.${snapshot}.seconds
-echo "${metric_name},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+timestamp=$(date +%s)
+echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
