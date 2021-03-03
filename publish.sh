@@ -43,6 +43,7 @@ algo_outputdir=runs/${run_id}/Output
 # Path on the local filesystem where production datasets will be stored.
 outputdir=runs/${run_id}/imagerec_prod_${snapshot}
 
+make venv
 source venv/bin/activate
 
 mkdir -p $(pwd)/runs/${run_id}/
