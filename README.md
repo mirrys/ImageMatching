@@ -49,3 +49,11 @@ The output .ipynb and .tsv files can be found in your output directory
 ls Output
 hywiki_2020-12-28.ipynb  hywiki_2020-12-28_wd_image_candidates.tsv
 ```
+
+### Get dataset Metrics
+To get the dataset metrics run the dataset_metrics_python script. The script expects the **snapshot** (required)
+and **output directory** (defaults to Output)
+```shell
+cd Dataset_Metrics/
+python3 dataset_metrics_runner.py 2021-01 Output
+```
