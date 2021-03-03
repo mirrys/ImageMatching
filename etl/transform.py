@@ -97,7 +97,7 @@ def parse_args():
     parser.add_argument('--snapshot', help='Montlhy snapshot date (YYYY-MM)')
     parser.add_argument('--source', help='Source dataset path')
     parser.add_argument('--destination', help='Destination path')
-    parser.add_argument('--dataset-id', help='Production dataset identifier (optional)', default=str(uuid.uuid4), dest='dataset_id')    
+    parser.add_argument('--dataset-id', help='Production dataset identifier (optional)', default=str(uuid.uuid4()), dest='dataset_id')    
     
     return parser.parse_args()
 
