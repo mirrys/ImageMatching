@@ -128,3 +128,6 @@ echo "Datasets are available at $outputdir/"
 metric_name=metrics.etl.export_prod_data.${snapshot}.seconds
 timestamp=$(date +%s)
 echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+
+echo "Export summary"
+cut -f 3,4 ${outputdir}/*.tsv | sort -k 1,2 | uniq -c 
