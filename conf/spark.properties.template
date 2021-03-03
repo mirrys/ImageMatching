@@ -1,0 +1,2 @@
+# Job specific config
+spark.sql.sources.partitionOverwriteMode	dynamic
