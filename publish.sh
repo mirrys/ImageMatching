@@ -84,7 +84,7 @@ spark_config=$runs/$run_id/regular.spark.properties
 cat conf/spark.properties.template /usr/lib/spark2/conf/spark-defaults.conf > ${spark_config}
 
 STARTIME=${SECONDS}
-spark2-submit --properties-file ${spark_config} etl/transform.py ${snapshot} imagerec/data/ imagerec_prod/data/
+spark2-submit --properties-file ${spark_config} etl/transform.py ${monthly_snapshot} imagerec/data/ imagerec_prod/data/
 ENDTIME=${SECONDS}
 metric_name=metrics.etl.transfrom.${snapshot}.second
 echo "${metric_name},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
@@ -104,6 +104,6 @@ for wiki in ${wikis}; do
 	hive -hiveconf username=${username} -hiveconf wiki=${wiki} -f export_prod_data.hql > ${outputdir}/prod-${wiki}-${snapshot}-wd_image_candidates.tsv
 done
 ENDTIME=${SECONDS}
-echo "Datasets are available at $outputdir/imagerec_prod_${snapshot}/"
+echo "Datasets are available at $outputdir/"
 metric_name=metrics.etl.export_prod_data.${snapshot}.seconds
 echo "${metric_name},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
