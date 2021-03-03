@@ -82,7 +82,7 @@ done
 echo "Generating production data"
 
 ## Generate spark config
-spark_config=$runs/$run_id/regular.spark.properties
+spark_config=runs/$run_id/regular.spark.properties
 cat conf/spark.properties.template /usr/lib/spark2/conf/spark-defaults.conf > ${spark_config}
 
 STARTTIME=${SECONDS}
