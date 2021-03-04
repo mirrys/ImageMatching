@@ -1,4 +1,4 @@
-from etl.transform import RawDataset, ImageRecommendation
+from etl.transform import ImageRecommendation
 
 
 def test_etl(raw_data):
