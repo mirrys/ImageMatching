@@ -1,0 +1,12 @@
+spark.master	yarn
+spark.submit.deployMode	client
+# Cluster topology for regular sized jobs (15% resource utilisation)
+# https://wikitech.wikimedia.org/wiki/Analytics/Systems/Cluster/Spark#Spark_Resource_Settings
+spark.driver.memory	2g
+spark.dynamicAllocation.maxExecutors	64
+spark.executor.memory	8g
+spark.executor.cores	4
+spark.sql.shuffle.partitions	256
+
+# Append spark-defaults.conf from:
+# /usr/lib/spark2/conf/spark-defaults.conf

@@ -8,6 +8,8 @@ setup(
     install_requires=[
         'beautifulsoup4>=4.9.3',
         'pandas>=1.2.1',
-        'papermill>=2.3.2',
+        'papermill>=2.3.2'],
+    dependency_links = [
+        'wmfdata @ git+ssh://git@github.com/wikimedia/wmfdata-python.git=wmfdata'
     ]
 )
