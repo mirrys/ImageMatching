@@ -2,6 +2,7 @@ import argparse
 import papermill as pm
 import os
 
+
 class DatasetMetricsRunner(object):
 
     def __init__(self, snapshot, output_dir):
@@ -26,6 +27,7 @@ class DatasetMetricsRunner(object):
             self.output_dir + '/dataset_metrics_' + self.snapshot + '.ipynb',
             parameters=dict(snapshot=self.snapshot, output_dir=self.output_dir)
         )
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Executes jupyter notebook with parameters. ' +
