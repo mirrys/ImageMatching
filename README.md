@@ -77,6 +77,6 @@ For more information refer to https://spark.apache.org/docs/latest/monitoring.ht
 To get the dataset metrics run the dataset_metrics_python script. The script expects the **snapshot** (required)
 and **output directory** (defaults to Output)
 ```shell
-cd Dataset_Metrics/
+cd dataset_metrics/
 python3 dataset_metrics_runner.py 2021-01 Output
 ```

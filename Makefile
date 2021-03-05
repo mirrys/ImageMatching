@@ -15,9 +15,9 @@ clean_spark:
 
 flake8:	venv
 	# stop the build if there are Python syntax errors or undefined names in *.py file
-	. venv/bin/activate; flake8 *.py etl/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+	. venv/bin/activate; flake8 *.py dataset_metrics/ etl/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
 	# exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-	. venv/bin/activate; flake8 *.py etl/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	. venv/bin/activate; flake8 *.py dataset_metrics/ etl/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 test:	venv
 	. venv/bin/activate; pytest --cov etl tests/
