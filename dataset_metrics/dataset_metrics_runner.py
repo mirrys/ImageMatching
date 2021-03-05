@@ -3,7 +3,7 @@ import papermill as pm
 import os
 
 
-class DatasetMetricsRunner(object):
+class DatasetMetricsRunner:
 
     def __init__(self, snapshot, output_dir):
         """
