@@ -1,4 +1,4 @@
-from etl.transform import RawDataset, ImageRecommendation
+from etl.transform import ImageRecommendation
 
 from pyspark.sql import functions as F
 
