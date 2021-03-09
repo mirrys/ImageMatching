@@ -12,7 +12,7 @@
 --	(image_id, confidence_rating, source fields): ""
 -- 
 -- Changelog:
---   * 2021-02-08: schema and format freeze.
+--   * 2021-03-08: schema and format freeze.
 -- 
 use ${hiveconf:username};
 set hivevar:null_value="";
