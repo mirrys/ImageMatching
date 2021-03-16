@@ -8,5 +8,8 @@ spark.executor.memory	8g
 spark.executor.cores	4
 spark.sql.shuffle.partitions	256
 
+# Job specific config
+spark.sql.sources.partitionOverwriteMode	dynamic
+
 # Append spark-defaults.conf from:
 # /usr/lib/spark2/conf/spark-defaults.conf

@@ -8,11 +8,9 @@
 --
 -- Execution
 -- hive -hiveconf username=<username> -f external_imagerec_prod.hql
-
 USE ${hiveconf:username};
 
 CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
-  `wiki` string,
   `page_id` string,
   `page_title` string,
   `image_id` string,
@@ -20,6 +18,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
   `source` string,
   `dataset_id` string,
   `insertion_ts` float)
+PARTITIONED BY (`wiki` string, `snapshot` string)
 ROW FORMAT SERDE
   'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
 WITH SERDEPROPERTIES (
