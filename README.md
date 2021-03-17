@@ -73,3 +73,10 @@ python3 algorunner.py 2020-12-28 hywiki Output
 Will submit the `algorunner` job, with additional instrumentation.
 
 For more information refer to https://spark.apache.org/docs/latest/monitoring.html.
+### Get dataset Metrics
+To get the dataset metrics run the dataset_metrics_python script. The script expects the **snapshot** (required)
+and **output directory** (defaults to Output)
+```shell
+cd dataset_metrics/
+python3 dataset_metrics_runner.py 2021-01 Output
+```
