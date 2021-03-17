@@ -4,7 +4,6 @@ from pyspark.sql import Column, DataFrame
 from pyspark.sql import functions as F
 
 import argparse
-import sys
 import uuid
 import datetime
 
@@ -19,10 +18,12 @@ class RawDataset:
         .add("page_id", StringType(), True)
         .add("page_title", StringType(), True)
         .add("top_candidates", StringType(), True)
-        .add("wiki_db", StringType(), True)
+        .add("instanceof", StringType(), True)
+        .add("wiki", StringType(), True)
         .add("snapshot", StringType(), True)
     )
     recommendation_schema = "array<struct<image:string,note:string,rating:double>>"
+    instanceof_schema = "struct<`entity-type`:string,`numeric-id`:bigint,id:string>"
 
 
 class ImageRecommendation:
@@ -62,7 +63,6 @@ class ImageRecommendation:
                 ),
             )
             .select("*", "data.image", "data.rating", "data.note")
-            .withColumnRenamed("wiki_db", "wiki")
             .withColumnRenamed("image", "image_id")
             .withColumn("confidence_rating", self.confidence_rating)
             .withColumn("source", self.source)
@@ -77,7 +77,6 @@ class ImageRecommendation:
         )
         without_recommendations = (
             self.dataFrame.where(F.col("top_candidates").isNull())
-            .withColumnRenamed("wiki_db", "wiki")
             .withColumn("image_id", F.lit(None))
             .withColumn("confidence_rating", F.lit(None))
             .withColumn("source", F.lit(None))
@@ -90,15 +89,46 @@ class ImageRecommendation:
                 "source",
             )
         )
-        return with_recommendations.union(without_recommendations)
+
+        with_instanceof = (
+            self.dataFrame.where(~F.col("instanceof").isNull())
+            .withColumn(
+                "data",
+                F.from_json("instanceof", RawDataset.instanceof_schema),
+            )
+            .select("*", "data.id")
+            .withColumnRenamed("id", "instanceof_id")
+            .select(
+                "wiki",
+                "page_id",
+                "instanceof_id"
+            )
+        )
+
+        without_instanceof = (
+            self.dataFrame.where(F.col("instanceof").isNull())
+            .withColumn("instanceof_id", F.lit(None))
+            .select(
+                "wiki",
+                "page_id",
+                "instanceof_id"
+            )
+        )
+
+        recommendations = with_recommendations.union(without_recommendations)
+        instanceof = with_instanceof.union(without_instanceof)
+
+        return recommendations.join(instanceof, ["wiki", "page_id"])
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Transform raw algo output to production datasets')
     parser.add_argument('--snapshot', help='Montlhy snapshot date (YYYY-MM)')
     parser.add_argument('--source', help='Source dataset path')
     parser.add_argument('--destination', help='Destination path')
-    parser.add_argument('--dataset-id', help='Production dataset identifier (optional)', default=str(uuid.uuid4()), dest='dataset_id')    
-    
+    parser.add_argument('--dataset-id', help='Production dataset identifier (optional)', default=str(uuid.uuid4()),
+                        dest='dataset_id')
+
     return parser.parse_args()
 
 
@@ -111,9 +141,9 @@ if __name__ == "__main__":
     dataset_id = args.dataset_id
 
     df = (
-        spark.read.options(delimiter="\t", header=False)
+        spark.read
         .schema(RawDataset.schema)
-        .csv(source)
+        .parquet(source)
     )
     insertion_ts = datetime.datetime.now().timestamp()
     (
@@ -125,6 +155,6 @@ if __name__ == "__main__":
         .sort(F.desc("page_title"))
         .write.options(delimiter="\t", header=False)
         .partitionBy("wiki", "snapshot")
-        .mode('overwrite') # Requires dynamic partitioning enabled
+        .mode('overwrite')  # Requires dynamic partitioning enabled
         .csv(destination)
     )
