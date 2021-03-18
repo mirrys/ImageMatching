@@ -18,12 +18,12 @@ class RawDataset:
         .add("page_id", StringType(), True)
         .add("page_title", StringType(), True)
         .add("top_candidates", StringType(), True)
-        .add("instanceof", StringType(), True)
-        .add("wiki", StringType(), True)
+        .add("instance_of", StringType(), True)
+        .add("wiki_db", StringType(), True)
         .add("snapshot", StringType(), True)
     )
     recommendation_schema = "array<struct<image:string,note:string,rating:double>>"
-    instanceof_schema = "struct<`entity-type`:string,`numeric-id`:bigint,id:string>"
+    instance_of_schema = "struct<`entity-type`:string,`numeric-id`:bigint,id:string>"
 
 
 class ImageRecommendation:
@@ -63,6 +63,7 @@ class ImageRecommendation:
                 ),
             )
             .select("*", "data.image", "data.rating", "data.note")
+            .withColumnRenamed("wiki_db", "wiki")
             .withColumnRenamed("image", "image_id")
             .withColumn("confidence_rating", self.confidence_rating)
             .withColumn("source", self.source)
@@ -77,6 +78,7 @@ class ImageRecommendation:
         )
         without_recommendations = (
             self.dataFrame.where(F.col("top_candidates").isNull())
+            .withColumnRenamed("wiki_db", "wiki")
             .withColumn("image_id", F.lit(None))
             .withColumn("confidence_rating", F.lit(None))
             .withColumn("source", F.lit(None))
@@ -90,35 +92,37 @@ class ImageRecommendation:
             )
         )
 
-        with_instanceof = (
-            self.dataFrame.where(~F.col("instanceof").isNull())
+        with_instance_of = (
+            self.dataFrame.where(~F.col("instance_of").isNull())
             .withColumn(
                 "data",
-                F.from_json("instanceof", RawDataset.instanceof_schema),
+                F.from_json("instance_of", RawDataset.instance_of_schema),
             )
             .select("*", "data.id")
-            .withColumnRenamed("id", "instanceof_id")
+            .withColumnRenamed("id", "instance_of_id")
+            .withColumnRenamed("wiki_db", "wiki")
             .select(
                 "wiki",
                 "page_id",
-                "instanceof_id"
+                "instance_of_id"
             )
         )
 
-        without_instanceof = (
-            self.dataFrame.where(F.col("instanceof").isNull())
-            .withColumn("instanceof_id", F.lit(None))
+        without_instance_of = (
+            self.dataFrame.where(F.col("instance_of").isNull())
+            .withColumn("instance_of_id", F.lit(None))
+            .withColumnRenamed("wiki_db", "wiki")
             .select(
                 "wiki",
                 "page_id",
-                "instanceof_id"
+                "instance_of_id"
             )
         )
 
         recommendations = with_recommendations.union(without_recommendations)
-        instanceof = with_instanceof.union(without_instanceof)
+        instance_of = with_instance_of.union(without_instance_of)
 
-        return recommendations.join(instanceof, ["wiki", "page_id"])
+        return recommendations.join(instance_of, ["wiki", "page_id"])
 
 
 def parse_args():
@@ -153,8 +157,8 @@ if __name__ == "__main__":
         .withColumn("insertion_ts", F.lit(insertion_ts))
         .withColumn("snapshot", F.lit(snapshot))
         .sort(F.desc("page_title"))
-        .write.options(delimiter="\t", header=False)
+        .write
         .partitionBy("wiki", "snapshot")
         .mode('overwrite')  # Requires dynamic partitioning enabled
-        .csv(destination)
+        .parquet(destination)
     )
