@@ -1,28 +1,16 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StringType, IntegerType
 from pyspark.sql import Column, DataFrame
 from pyspark.sql import functions as F
+from pyspark.sql.types import StructType, StringType, IntegerType
+from schema import RawDataset
 
 import argparse
-import sys
 import uuid
 import datetime
 
 spark = SparkSession.builder.getOrCreate()
 
 
-class RawDataset:
-    schema = (
-        StructType()
-        .add("pandas_idx", StringType(), True)
-        .add("item_id", StringType(), True)
-        .add("page_id", StringType(), True)
-        .add("page_title", StringType(), True)
-        .add("top_candidates", StringType(), True)
-        .add("wiki_db", StringType(), True)
-        .add("snapshot", StringType(), True)
-    )
-    recommendation_schema = "array<struct<image:string,note:string,rating:double>>"
 
 
 class ImageRecommendation:
@@ -48,9 +36,9 @@ class ImageRecommendation:
     def __init__(self, dataFrame: DataFrame):
         self.dataFrame = dataFrame
         if not dataFrame.schema == RawDataset.schema:
-            raise AttributeError(
-                f"Invalid schema. Expected '{RawDataset.schema}'. Got '{dataFrame.schema}"
-            )
+           raise AttributeError(
+               f"Invalid schema. Expected '{RawDataset.schema}'. Got '{dataFrame.schema}"
+           )
 
     def transform(self) -> DataFrame:
         with_recommendations = (
@@ -110,10 +98,10 @@ if __name__ == "__main__":
     destination = args.destination
     dataset_id = args.dataset_id
 
+    num_partitions = 1
+
     df = (
-        spark.read.options(delimiter="\t", header=False)
-        .schema(RawDataset.schema)
-        .csv(source)
+        spark.read.parquet(source)
     )
     insertion_ts = datetime.datetime.now().timestamp()
     (
@@ -123,7 +111,7 @@ if __name__ == "__main__":
         .withColumn("insertion_ts", F.lit(insertion_ts))
         .withColumn("snapshot", F.lit(snapshot))
         .sort(F.desc("page_title"))
-        .write.options(delimiter="\t", header=False)
+        .coalesce(num_partitions)
         .partitionBy("wiki", "snapshot")
         .mode('overwrite') # Requires dynamic partitioning enabled
         .csv(destination)
