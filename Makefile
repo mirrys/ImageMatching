@@ -20,4 +20,4 @@ flake8:	venv
 	. venv/bin/activate; flake8 *.py dataset_metrics/ etl/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 test:	venv
-	. venv/bin/activate; PYTHONPATH=etl pytest --cov etl tests/
+	. venv/bin/activate; PYTHONPATH=${PYTHONPATH}:etl/ pytest --cov etl tests/
