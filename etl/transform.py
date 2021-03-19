@@ -46,6 +46,16 @@ class ImageRecommendation:
         )
     )
 
+    instance_of: Column = (
+        F.when(
+            F.col("instance_of").isNull(),
+            F.lit(None)
+        )
+        .otherwise(
+            F.from_json("instance_of", RawDataset.instance_of_schema).getItem("id")
+        )
+    )
+
     def __init__(self, dataFrame: DataFrame):
         self.dataFrame = dataFrame
         if not dataFrame.schema == RawDataset.schema:
@@ -74,6 +84,7 @@ class ImageRecommendation:
                 "image_id",
                 "confidence_rating",
                 "source",
+                "instance_of",
             )
         )
         without_recommendations = (
@@ -89,40 +100,11 @@ class ImageRecommendation:
                 "image_id",
                 "confidence_rating",
                 "source",
+                "instance_of",
             )
         )
 
-        with_instance_of = (
-            self.dataFrame.where(~F.col("instance_of").isNull())
-            .withColumn(
-                "data",
-                F.from_json("instance_of", RawDataset.instance_of_schema),
-            )
-            .select("*", "data.id")
-            .withColumnRenamed("id", "instance_of_id")
-            .withColumnRenamed("wiki_db", "wiki")
-            .select(
-                "wiki",
-                "page_id",
-                "instance_of_id"
-            )
-        )
-
-        without_instance_of = (
-            self.dataFrame.where(F.col("instance_of").isNull())
-            .withColumn("instance_of_id", F.lit(None))
-            .withColumnRenamed("wiki_db", "wiki")
-            .select(
-                "wiki",
-                "page_id",
-                "instance_of_id"
-            )
-        )
-
-        recommendations = with_recommendations.union(without_recommendations)
-        instance_of = with_instance_of.union(without_instance_of)
-
-        return recommendations.join(instance_of, ["wiki", "page_id"])
+        return with_recommendations.union(without_recommendations).withColumn("instance_of", self.instance_of)
 
 
 def parse_args():
