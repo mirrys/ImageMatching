@@ -16,6 +16,7 @@ def test_etl(raw_data):
                     "page_title",
                     "image_id",
                     "confidence_rating",
+                    "instance_of",
                     "source",
                 }
             )
@@ -47,3 +48,14 @@ def test_etl(raw_data):
         .count()
         == 0
     )
+
+    # Instance_of json is correctly parsed
+    expected_instance_of = "Q577"
+    rows = (
+        ddf.where(F.col("instance_of") != "null")
+        .select("instance_of")
+        .distinct()
+        .collect()
+    )
+    assert len(rows) == 1
+    assert rows[0]["instance_of"] == expected_instance_of

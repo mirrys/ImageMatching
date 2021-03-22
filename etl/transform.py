@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import Column, DataFrame
 from pyspark.sql import functions as F
-from pyspark.sql.types import StructType, StringType, IntegerType
+from pyspark.sql.types import IntegerType
 from schema import RawDataset
 
 import argparse
@@ -9,8 +9,6 @@ import uuid
 import datetime
 
 spark = SparkSession.builder.getOrCreate()
-
-
 
 
 class ImageRecommendation:
@@ -33,12 +31,22 @@ class ImageRecommendation:
         )
     )
 
+    instance_of: Column = (
+        F.when(
+            F.col("instance_of").isNull(),
+            F.lit(None)
+        )
+        .otherwise(
+            F.from_json("instance_of", RawDataset.instance_of_schema).getItem("id")
+        )
+    )
+
     def __init__(self, dataFrame: DataFrame):
         self.dataFrame = dataFrame
         if not dataFrame.schema == RawDataset.schema:
-           raise AttributeError(
+            raise AttributeError(
                f"Invalid schema. Expected '{RawDataset.schema}'. Got '{dataFrame.schema}"
-           )
+            )
 
     def transform(self) -> DataFrame:
         with_recommendations = (
@@ -46,7 +54,7 @@ class ImageRecommendation:
             .withColumn(
                 "data",
                 F.explode(
-                    F.from_json("top_candidates", RawDataset.recommendation_schema)
+                    F.from_json("top_candidates", RawDataset.top_candidates_schema)
                 ),
             )
             .select("*", "data.image", "data.rating", "data.note")
@@ -61,6 +69,7 @@ class ImageRecommendation:
                 "image_id",
                 "confidence_rating",
                 "source",
+                "instance_of",
             )
         )
         without_recommendations = (
@@ -76,17 +85,21 @@ class ImageRecommendation:
                 "image_id",
                 "confidence_rating",
                 "source",
+                "instance_of",
             )
         )
-        return with_recommendations.union(without_recommendations)
+
+        return with_recommendations.union(without_recommendations).withColumn("instance_of", self.instance_of)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Transform raw algo output to production datasets')
     parser.add_argument('--snapshot', help='Montlhy snapshot date (YYYY-MM)')
     parser.add_argument('--source', help='Source dataset path')
     parser.add_argument('--destination', help='Destination path')
-    parser.add_argument('--dataset-id', help='Production dataset identifier (optional)', default=str(uuid.uuid4()), dest='dataset_id')    
-    
+    parser.add_argument('--dataset-id', help='Production dataset identifier (optional)', default=str(uuid.uuid4()),
+                        dest='dataset_id')
+
     return parser.parse_args()
 
 
@@ -101,7 +114,9 @@ if __name__ == "__main__":
     num_partitions = 1
 
     df = (
-        spark.read.parquet(source)
+        spark.read
+        .schema(RawDataset.schema)
+        .parquet(source)
     )
     insertion_ts = datetime.datetime.now().timestamp()
     (
@@ -112,7 +127,8 @@ if __name__ == "__main__":
         .withColumn("snapshot", F.lit(snapshot))
         .sort(F.desc("page_title"))
         .coalesce(num_partitions)
+        .write
         .partitionBy("wiki", "snapshot")
-        .mode('overwrite') # Requires dynamic partitioning enabled
-        .csv(destination)
+        .mode('overwrite')  # Requires dynamic partitioning enabled
+        .parquet(destination)
     )
