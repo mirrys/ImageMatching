@@ -56,6 +56,10 @@ mkdir -p $metrics_dir
 echo "Starting training run ${run_id} for snapshot=$snapshot. Model artifacts will be collected under
 $(pwd)/runs/${run_id}"
 
+## Generate spark config
+spark_config=runs/$run_id/regular.spark.properties
+cat conf/spark.properties.template /usr/lib/spark2/conf/spark-defaults.conf > ${spark_config}
+
 # TODO(gmodena, 2021-02-02): 
 # Passing one wiki at a time to get a feeling for runtime deltas (to some degree, we could get this info from parsing hdfs snapshots).
 # We could pass the whole list at algorunner.py at once,
@@ -76,10 +80,17 @@ for wiki in ${wikis}; do
 	# 2. Upload to HDFS
         echo "Publishing raw data to HDFS for ${wiki}"
 	STARTTIME=${SECONDS}
-	hadoop fs -rm -r imagerec/data/wiki_db=${wiki}/snapshot=${monthly_snapshot}/
-	hadoop fs -mkdir -p imagerec/data/wiki_db=${wiki}/snapshot=${monthly_snapshot}/
 
-	hadoop fs -copyFromLocal ${algo_outputdir}/${wiki}_${snapshot}_wd_image_candidates.tsv imagerec/data/wiki_db=${wiki}/snapshot=${monthly_snapshot}/
+	hdfs_imagerec=/user/${username}/imagerec
+	spark_master_local='local[2]' # Use a local master to copy from the Driver to HDFS.
+	spark2-submit --properties-file ${spark_config} --master ${spark_master_local} \
+	  --files etl/schema.py \
+	  etl/raw2parquet.py \
+	  --wiki $wiki \
+	  --snapshot ${monthly_snapshot} \
+	  --source file://$(pwd)/${algo_outputdir}/${wiki}_${snapshot}_wd_image_candidates.tsv \
+	  --destination ${hdfs_imagerec}/
+
 	ENDTIME=${SECONDS}
 	metric_name=metrics.hdfs.copyrawdata.${wiki}.${snapshot}.seconds
         timestamp=$(date +%s)
@@ -97,15 +108,14 @@ done
 # 4. Submit the Spark production data ETL
 echo "Generating production data"
 
-## Generate spark config
-spark_config=runs/$run_id/regular.spark.properties
-cat conf/spark.properties.template /usr/lib/spark2/conf/spark-defaults.conf > ${spark_config}
 
 STARTTIME=${SECONDS}
-spark2-submit --properties-file ${spark_config} etl/transform.py \
+
+hdfs_imagerec_prod=/user/${username}/imagerec_prod/data
+spark2-submit --properties-file ${spark_config} --files etl/schema.py etl/transform.py \
 	--snapshot ${monthly_snapshot} \
-	--source imagerec/data/ \
-	--destination imagerec_prod/data/ \
+	--source ${hdfs_imagerec} \
+	--destination ${hdfs_imagerec_prod} \
 	--dataset-id ${run_id}
 ENDTIME=${SECONDS}
 metric_name=metrics.etl.transfrom.${snapshot}.second

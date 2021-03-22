@@ -49,15 +49,38 @@ hywiki_2020-12-28.ipynb  hywiki_2020-12-28_wd_image_candidates.tsv
 `etl` contains [pyspark](https://spark.apache.org/docs/latest/api/python/index.html) utilities to transform the 
 algo raw output into a _production dataset_ that will be consumed by a service. 
 
-The transform etl can be run on a local cluster with:
-```python
-spark2-submit etl/transform.py <raw data> <production data>
+### TSV to parquet
+`raw2parquet.py` is a job that loads a tsv file (model output), converts it to
+parquet, and stores it to HDFS (or local) using the `wiki_db=wiki/snapshot=YYYY-MM` 
+partitioning scheme.
+```bash
+spark2-submit --properties-file conf/spark.properties --files etl/schema.py etl/raw2parquet.py \
+    --wiki <wiki name> \
+    --snapshot <YYYY-MM> \
+    --source <raw data> \
+    --destination <production data>
+```
+
+### Production dataset
+
+`transform.py` parses raw model output and tansforms it to production data,
+and stores it to HDFS (or local) using the `wiki=wiki/snapshot=YYYY-MM` partitioning scheme.
+ 
+```bash
+spark2-submit --files etl/schema.py etl/transform.py \
+    --snapshot <YYYY-MM> \
+    --source <raw data> \
+    --destination <production data>
 ```
 
 `conf/spark.properties` provides default settings to run the ETL as a [regular size spark job](https://wikitech.wikimedia.org/wiki/Analytics/Systems/Cluster/Spark#Spark_Resource_Settings) on WMF's Analytics cluster.
 
-```python
-spark2-submit --properties-file conf/spark.properties etl/transform.py <raw data> <production data>
+```bash
+spark2-submit --properties-file conf/spark.properties --files etl/schema.py etl/transform.py \
+    --wiki <wiki name> \
+    --snapshot <YYYY-MM> \
+    --source <raw data> \
+    --destination <production data>
 ```
 
 ## Metrics collection
