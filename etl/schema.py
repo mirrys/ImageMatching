@@ -1,4 +1,4 @@
-from pyspark.sql.types import StructType, StringType, IntegerType
+from pyspark.sql.types import StructType, StringType
 
 
 class CsvDataset:
@@ -17,4 +17,5 @@ class RawDataset(CsvDataset):
     schema = CsvDataset.schema.add("wiki_db", StringType(), True).add(
         "snapshot", StringType(), True
     )
-    recommendation_schema = "array<struct<image:string,note:string,rating:double>>"
+    top_candidates_schema = "array<struct<image:string,note:string,rating:double>>"
+    instance_of_schema = "struct<`entity-type`:string,`numeric-id`:bigint,id:string>"

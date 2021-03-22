@@ -1,13 +1,8 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StringType, IntegerType
-from pyspark.sql import Column, DataFrame
 from pyspark.sql import functions as F
 from schema import CsvDataset
 
 import argparse
-import sys
-import uuid
-import datetime
 
 spark = SparkSession.builder.getOrCreate()
 
@@ -46,4 +41,3 @@ if __name__ == "__main__":
     ).parquet(
         destination
     )  # Requires dynamic partitioning enabled
-

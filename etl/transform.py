@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import Column, DataFrame
 from pyspark.sql import functions as F
-from pyspark.sql.types import StructType, StringType, IntegerType
+from pyspark.sql.types import IntegerType
 from schema import RawDataset
 
 import argparse
@@ -9,8 +9,6 @@ import uuid
 import datetime
 
 spark = SparkSession.builder.getOrCreate()
-
-
 
 
 class ImageRecommendation:
@@ -46,9 +44,9 @@ class ImageRecommendation:
     def __init__(self, dataFrame: DataFrame):
         self.dataFrame = dataFrame
         if not dataFrame.schema == RawDataset.schema:
-           raise AttributeError(
+            raise AttributeError(
                f"Invalid schema. Expected '{RawDataset.schema}'. Got '{dataFrame.schema}"
-           )
+            )
 
     def transform(self) -> DataFrame:
         with_recommendations = (
@@ -56,7 +54,7 @@ class ImageRecommendation:
             .withColumn(
                 "data",
                 F.explode(
-                    F.from_json("top_candidates", RawDataset.recommendation_schema)
+                    F.from_json("top_candidates", RawDataset.top_candidates_schema)
                 ),
             )
             .select("*", "data.image", "data.rating", "data.note")
