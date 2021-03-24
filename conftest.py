@@ -56,7 +56,7 @@ def wikis(spark_session: SparkSession) -> DataFrame:
                 "image was found in the following Wikis: ruwiki,itwiki,enwiki"
             ],
             ["image was found in the following Wikis: "],
-            [],
+            [None],
         ],
         ["note"],
     )
