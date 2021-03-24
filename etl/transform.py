@@ -31,21 +31,19 @@ class ImageRecommendation:
         )
     )
 
-    instance_of: Column = (
-        F.when(
-            F.col("instance_of").isNull(),
-            F.lit(None)
-        )
-        .otherwise(
-            F.from_json("instance_of", RawDataset.instance_of_schema).getItem("id")
-        )
+    instance_of: Column = F.when(F.col("instance_of").isNull(), F.lit(None)).otherwise(
+        F.from_json("instance_of", RawDataset.instance_of_schema).getItem("id")
+    )
+
+    found_on: Column = F.when(F.col("note").isNull(), F.lit(None)).otherwise(
+        F.split(F.regexp_extract(F.col("note"), "Wikis:\s+(.*)$", 1), ",")
     )
 
     def __init__(self, dataFrame: DataFrame):
         self.dataFrame = dataFrame
         if not dataFrame.schema == RawDataset.schema:
             raise AttributeError(
-               f"Invalid schema. Expected '{RawDataset.schema}'. Got '{dataFrame.schema}"
+                f"Invalid schema. Expected '{RawDataset.schema}'. Got '{dataFrame.schema}"
             )
 
     def transform(self) -> DataFrame:
@@ -62,6 +60,7 @@ class ImageRecommendation:
             .withColumnRenamed("image", "image_id")
             .withColumn("confidence_rating", self.confidence_rating)
             .withColumn("source", self.source)
+            .withColumn("found_on", self.found_on)
             .select(
                 "wiki",
                 "page_id",
@@ -70,6 +69,7 @@ class ImageRecommendation:
                 "confidence_rating",
                 "source",
                 "instance_of",
+                "found_on",
             )
         )
         without_recommendations = (
@@ -78,6 +78,7 @@ class ImageRecommendation:
             .withColumn("image_id", F.lit(None))
             .withColumn("confidence_rating", F.lit(None))
             .withColumn("source", F.lit(None))
+            .withColumn("found_on", F.lit(None))
             .select(
                 "wiki",
                 "page_id",
@@ -86,19 +87,28 @@ class ImageRecommendation:
                 "confidence_rating",
                 "source",
                 "instance_of",
+                "found_on",
             )
         )
 
-        return with_recommendations.union(without_recommendations).withColumn("instance_of", self.instance_of)
+        return with_recommendations.union(without_recommendations).withColumn(
+            "instance_of", self.instance_of
+        )
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Transform raw algo output to production datasets')
-    parser.add_argument('--snapshot', help='Montlhy snapshot date (YYYY-MM)')
-    parser.add_argument('--source', help='Source dataset path')
-    parser.add_argument('--destination', help='Destination path')
-    parser.add_argument('--dataset-id', help='Production dataset identifier (optional)', default=str(uuid.uuid4()),
-                        dest='dataset_id')
+    parser = argparse.ArgumentParser(
+        description="Transform raw algo output to production datasets"
+    )
+    parser.add_argument("--snapshot", help="Montlhy snapshot date (YYYY-MM)")
+    parser.add_argument("--source", help="Source dataset path")
+    parser.add_argument("--destination", help="Destination path")
+    parser.add_argument(
+        "--dataset-id",
+        help="Production dataset identifier (optional)",
+        default=str(uuid.uuid4()),
+        dest="dataset_id",
+    )
 
     return parser.parse_args()
 
@@ -113,11 +123,7 @@ if __name__ == "__main__":
 
     num_partitions = 1
 
-    df = (
-        spark.read
-        .schema(RawDataset.schema)
-        .parquet(source)
-    )
+    df = spark.read.schema(RawDataset.schema).parquet(source)
     insertion_ts = datetime.datetime.now().timestamp()
     (
         ImageRecommendation(df)
@@ -127,8 +133,7 @@ if __name__ == "__main__":
         .withColumn("snapshot", F.lit(snapshot))
         .sort(F.desc("page_title"))
         .coalesce(num_partitions)
-        .write
-        .partitionBy("wiki", "snapshot")
-        .mode('overwrite')  # Requires dynamic partitioning enabled
+        .write.partitionBy("wiki", "snapshot")
+        .mode("overwrite")  # Requires dynamic partitioning enabled
         .parquet(destination)
     )
