@@ -13,6 +13,7 @@
 -- 
 -- Changelog:
 --   * 2021-03-08: schema and format freeze.
+--   * 2021-03-25: add filter_out to where clause
 -- 
 use ${hiveconf:username};
 set hivevar:null_value="";
