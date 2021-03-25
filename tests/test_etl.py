@@ -68,6 +68,10 @@ def test_note_parsing(wikis, spark_session):
         "found_on"
     )
     expected_df = spark_session.createDataFrame(
-        [Row(found_on=["ruwiki", "itwiki", "enwiki"]), Row(found_on=[""]), Row(found_on=None)]
+        [
+            Row(found_on=["ruwiki", "itwiki", "enwiki"]),
+            Row(found_on=[""]),
+            Row(found_on=None),
+        ]
     )
     assert_shallow_equals(transformed_df, expected_df)
