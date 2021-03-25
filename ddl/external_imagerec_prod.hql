@@ -17,21 +17,12 @@ CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
   `confidence_rating` string,
   `source` string,
   `dataset_id` string,
-  `insertion_ts` float)
+  `insertion_ts` double, 
+  `found_on` array<string>)
 PARTITIONED BY (`wiki` string, `snapshot` string)
-ROW FORMAT SERDE
-  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
-WITH SERDEPROPERTIES (
-  'field.delim'='\t',
-  'serialization.format'='\t',
-  'serialization.null.format'='""')
-STORED AS INPUTFORMAT
-  'org.apache.hadoop.mapred.TextInputFormat'
-OUTPUTFORMAT
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+STORED AS PARQUET
 LOCATION
   'hdfs://analytics-hadoop/user/${hiveconf:username}/imagerec_prod/data';
-
 
 -- Update partition metadata
 MSCK REPAIR TABLE `imagerec_prod`;
