@@ -17,6 +17,7 @@ def test_etl(raw_data):
                     "image_id",
                     "confidence_rating",
                     "instance_of",
+                    "filter_out",
                     "source",
                 }
             )
@@ -59,3 +60,14 @@ def test_etl(raw_data):
     )
     assert len(rows) == 1
     assert rows[0]["instance_of"] == expected_instance_of
+
+    # Pages are correctly marked for filtering
+    expected_page_id = "523523"
+    filter_out_rows = (
+        ddf.where(F.col("filter_out"))
+        .select("page_id")
+        .distinct()
+        .collect()
+    )
+    assert len(filter_out_rows) == 1
+    assert filter_out_rows[0]["page_id"] == expected_page_id

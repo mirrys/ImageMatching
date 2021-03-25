@@ -12,6 +12,16 @@ spark = SparkSession.builder.getOrCreate()
 
 
 class ImageRecommendation:
+    """
+    Pages with the following instance_of should be labeled for filtering out:
+
+    Q577      Instance of a year
+    Q3186692  Instance of a calendar year
+    Q4167410  Instance of Wikimedia disambiguation page
+    Q13406463 Instance of Wikimedia list article
+    """
+    instance_of_to_filter_out = {"Q577", "Q3186692", "Q4167410", "Q13406463"}
+
     confidence_rating: Column = (
         F.when(F.col("rating").cast(IntegerType()) == 1, F.lit("high"))
         .when(F.col("rating").cast(IntegerType()) == 2, F.lit("medium"))
@@ -39,6 +49,14 @@ class ImageRecommendation:
         .otherwise(
             F.from_json("instance_of", RawDataset.instance_of_schema).getItem("id")
         )
+    )
+
+    filter_out: Column = (
+        F.when(
+            F.col("instance_of").isin(instance_of_to_filter_out),
+            F.lit(True)
+        )
+        .otherwise(False)
     )
 
     def __init__(self, dataFrame: DataFrame):
@@ -89,7 +107,9 @@ class ImageRecommendation:
             )
         )
 
-        return with_recommendations.union(without_recommendations).withColumn("instance_of", self.instance_of)
+        return with_recommendations.union(without_recommendations)\
+            .withColumn("instance_of", self.instance_of)\
+            .withColumn("filter_out", self.filter_out)
 
 
 def parse_args():

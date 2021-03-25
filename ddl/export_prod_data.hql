@@ -26,4 +26,4 @@ select page_id,
 	insertion_ts, 
 	wiki
 from imagerec_prod 
-where wiki = '${hiveconf:wiki}' and snapshot='${hiveconf:snapshot}'
+where wiki = '${hiveconf:wiki}' and snapshot='${hiveconf:snapshot}' and filter_out=false
