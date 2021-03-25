@@ -35,9 +35,7 @@ class ImageRecommendation:
         F.from_json("instance_of", RawDataset.instance_of_schema).getItem("id")
     )
 
-    found_on: Column = F.when(F.col("note").isNull(), F.lit(None)).otherwise(
-        F.split(F.regexp_extract(F.col("note"), "Wikis:\s+(.*)$", 1), ",")
-    )
+    found_on: Column = F.when(F.col("note").isNull(), F.lit(None)).otherwise(F.split(F.regexp_replace(F.regexp_extract(F.col("note"), "Wikis:\s+(.*)$", 1), "\s+", ""), ","))
 
     def __init__(self, dataFrame: DataFrame):
         self.dataFrame = dataFrame

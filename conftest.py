@@ -53,7 +53,7 @@ def wikis(spark_session: SparkSession) -> DataFrame:
     return spark_session.createDataFrame(
         [
             [
-                "image was found in the following Wikis: ruwiki,itwiki,enwiki"
+                "image was found in the following Wikis: ruwiki, itwiki,enwiki"
             ],
             ["image was found in the following Wikis: "],
             [None],
