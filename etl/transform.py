@@ -3,6 +3,7 @@ from pyspark.sql import Column, DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.types import IntegerType
 from schema import RawDataset
+from instances_to_filter import InstancesToFilter
 
 import argparse
 import uuid
@@ -12,16 +13,6 @@ spark = SparkSession.builder.getOrCreate()
 
 
 class ImageRecommendation:
-    """
-    Pages with the following instance_of should be labeled for filtering out:
-
-    Q577      Instance of a year
-    Q3186692  Instance of a calendar year
-    Q4167410  Instance of Wikimedia disambiguation page
-    Q13406463 Instance of Wikimedia list article
-    """
-    instance_of_to_filter_out = {"Q577", "Q3186692", "Q4167410", "Q13406463"}
-
     confidence_rating: Column = (
         F.when(F.col("rating").cast(IntegerType()) == 1, F.lit("high"))
         .when(F.col("rating").cast(IntegerType()) == 2, F.lit("medium"))
@@ -53,7 +44,7 @@ class ImageRecommendation:
 
     filter_out: Column = (
         F.when(
-            F.col("instance_of").isin(instance_of_to_filter_out),
+            F.col("instance_of").isin(InstancesToFilter.list()),
             F.lit(True)
         )
         .otherwise(False)
