@@ -15,10 +15,14 @@
 -- Changelog:
 --   * 2021-03-08: schema and format freeze.
 --   * 2021-03-25: append found_on column
+
 use ${hiveconf:username};
 set hivevar:null_value="";
 set hivevar:found_on_delimiter=",";
+set hive.cli.print.header=true;
 
+insert overwrite local directory '${hiveconf:output_path}'
+row format delimited fields terminated by '\t'
 select page_id,
 	page_title,
 	nvl(image_id, ${null_value}) as image_id,
