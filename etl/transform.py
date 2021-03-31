@@ -3,6 +3,7 @@ from pyspark.sql import Column, DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.types import IntegerType
 from schema import RawDataset
+from instances_to_filter import InstancesToFilter
 
 import argparse
 import uuid
@@ -39,6 +40,14 @@ class ImageRecommendation:
         .otherwise(
             F.from_json("instance_of", RawDataset.instance_of_schema).getItem("id")
         )
+    )
+
+    is_article_page: Column = (
+        F.when(
+            F.col("instance_of").isin(InstancesToFilter.list()),
+            F.lit(False)
+        )
+        .otherwise(True)
     )
 
     def __init__(self, dataFrame: DataFrame):
@@ -89,7 +98,9 @@ class ImageRecommendation:
             )
         )
 
-        return with_recommendations.union(without_recommendations).withColumn("instance_of", self.instance_of)
+        return with_recommendations.union(without_recommendations)\
+            .withColumn("instance_of", self.instance_of)\
+            .withColumn("is_article_page", self.is_article_page)
 
 
 def parse_args():
