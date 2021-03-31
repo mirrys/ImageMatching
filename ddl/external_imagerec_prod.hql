@@ -21,7 +21,6 @@ CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
   `dataset_id` string,
   `insertion_ts` double, 
   `found_on` array<string>)
-  `insertion_ts` double)
 PARTITIONED BY (`wiki` string, `snapshot` string)
 STORED AS PARQUET
 LOCATION
