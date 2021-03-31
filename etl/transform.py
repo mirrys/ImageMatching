@@ -142,3 +142,5 @@ if __name__ == "__main__":
         .mode("overwrite")  # Requires dynamic partitioning enabled
         .parquet(destination)
     )
+    spark.stop()
+
