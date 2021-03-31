@@ -17,7 +17,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
   `confidence_rating` string,
   `source` string,
   `instance_of` string,
-  `filter_out` boolean,
+  `is_article_page` boolean,
   `dataset_id` string,
   `insertion_ts` double)
 PARTITIONED BY (`wiki` string, `snapshot` string)

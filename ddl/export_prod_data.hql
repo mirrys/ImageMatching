@@ -13,7 +13,7 @@
 -- 
 -- Changelog:
 --   * 2021-03-08: schema and format freeze.
---   * 2021-03-25: add filter_out to where clause
+--   * 2021-03-25: add is_article_page to where clause
 -- 
 use ${hiveconf:username};
 set hivevar:null_value="";
@@ -27,4 +27,4 @@ select page_id,
 	insertion_ts, 
 	wiki
 from imagerec_prod 
-where wiki = '${hiveconf:wiki}' and snapshot='${hiveconf:snapshot}' and filter_out=false
+where wiki = '${hiveconf:wiki}' and snapshot='${hiveconf:snapshot}' and is_article_page=true

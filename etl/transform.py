@@ -42,12 +42,12 @@ class ImageRecommendation:
         )
     )
 
-    filter_out: Column = (
+    is_article_page: Column = (
         F.when(
             F.col("instance_of").isin(InstancesToFilter.list()),
-            F.lit(True)
+            F.lit(False)
         )
-        .otherwise(False)
+        .otherwise(True)
     )
 
     def __init__(self, dataFrame: DataFrame):
@@ -100,7 +100,7 @@ class ImageRecommendation:
 
         return with_recommendations.union(without_recommendations)\
             .withColumn("instance_of", self.instance_of)\
-            .withColumn("filter_out", self.filter_out)
+            .withColumn("is_article_page", self.is_article_page)
 
 
 def parse_args():

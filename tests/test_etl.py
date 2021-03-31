@@ -17,7 +17,7 @@ def test_etl(raw_data):
                     "image_id",
                     "confidence_rating",
                     "instance_of",
-                    "filter_out",
+                    "is_article_page",
                     "source",
                 }
             )
@@ -64,7 +64,7 @@ def test_etl(raw_data):
     # Pages are correctly marked for filtering
     expected_page_id = "523523"
     filter_out_rows = (
-        ddf.where(F.col("filter_out"))
+        ddf.where(~F.col("is_article_page"))
         .select("page_id")
         .distinct()
         .collect()

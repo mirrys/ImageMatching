@@ -9,4 +9,4 @@ class InstancesToFilter(Enum):
 
     @classmethod
     def list(cls):
-        return list(map(lambda p: p.value, InstancesToFilter))
+        return [p.value for p in InstancesToFilter]
