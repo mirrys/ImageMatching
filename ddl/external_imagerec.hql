@@ -24,7 +24,6 @@ PARTITIONED BY (
 STORED AS PARQUET
 LOCATION
   'hdfs://analytics-hadoop/user/${hiveconf:username}/imagerec'
-TBLPROPERTIES ("skip.header.line.count"="1");
 
 -- Update partition metadata
 MSCK REPAIR TABLE `imagerec`;

@@ -16,13 +16,16 @@ CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
   `image_id` string,
   `confidence_rating` string,
   `source` string,
+  `instance_of` string,
+  `is_article_page` boolean,
   `dataset_id` string,
   `insertion_ts` double, 
   `found_on` array<string>)
+  `insertion_ts` double)
 PARTITIONED BY (`wiki` string, `snapshot` string)
 STORED AS PARQUET
 LOCATION
-  'hdfs://analytics-hadoop/user/${hiveconf:username}/imagerec_prod/data';
+  'hdfs://analytics-hadoop/user/${hiveconf:username}/imagerec_prod';
 
 -- Update partition metadata
 MSCK REPAIR TABLE `imagerec_prod`;

@@ -15,7 +15,8 @@
 -- Changelog:
 --   * 2021-03-08: schema and format freeze.
 --   * 2021-03-25: append found_on column
-
+--   * 2021-03-25: add is_article_page to where clause
+-- 
 use ${hiveconf:username};
 set hivevar:null_value="";
 set hivevar:found_on_delimiter=",";
@@ -33,4 +34,4 @@ select page_id,
 	wiki,
         concat_ws(${found_on_delimiter}, found_on) as found_on
 from imagerec_prod 
-where wiki = '${hiveconf:wiki}' and snapshot='${hiveconf:snapshot}'
+where wiki = '${hiveconf:wiki}' and snapshot='${hiveconf:snapshot}' and is_article_page=true

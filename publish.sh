@@ -115,7 +115,7 @@ echo "Generating production data"
 
 STARTTIME=${SECONDS}
 
-hdfs_imagerec_prod=/user/${username}/imagerec_prod/data
+hdfs_imagerec_prod=/user/${username}/imagerec_prod
 spark2-submit --properties-file ${spark_config} --files etl/schema.py etl/transform.py \
 	--snapshot ${monthly_snapshot} \
 	--source ${hdfs_imagerec} \
