@@ -28,3 +28,4 @@ LOCATION
 
 -- Update partition metadata
 MSCK REPAIR TABLE `imagerec_prod`;
+

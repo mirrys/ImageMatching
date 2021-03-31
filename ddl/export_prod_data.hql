@@ -35,3 +35,4 @@ select page_id,
         concat_ws(${found_on_delimiter}, found_on) as found_on
 from imagerec_prod 
 where wiki = '${hiveconf:wiki}' and snapshot='${hiveconf:snapshot}' and is_article_page=true
+
