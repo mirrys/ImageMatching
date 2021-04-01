@@ -41,3 +41,4 @@ if __name__ == "__main__":
     ).parquet(
         destination
     )  # Requires dynamic partitioning enabled
+    spark.stop()

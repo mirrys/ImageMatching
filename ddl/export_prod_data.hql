@@ -10,14 +10,20 @@
 --   * Field delimiter: "\t"
 --   * Null value for missing recommendations 
 --	(image_id, confidence_rating, source fields): ""
+--   * found_on: list of wikis delimited by ','
 -- 
 -- Changelog:
 --   * 2021-03-08: schema and format freeze.
+--   * 2021-03-25: append found_on column
 --   * 2021-03-25: add is_article_page to where clause
 -- 
 use ${hiveconf:username};
 set hivevar:null_value="";
+set hivevar:found_on_delimiter=",";
+set hive.cli.print.header=true;
 
+insert overwrite local directory '${hiveconf:output_path}'
+row format delimited fields terminated by '\t'
 select page_id,
 	page_title,
 	nvl(image_id, ${null_value}) as image_id,
@@ -25,6 +31,8 @@ select page_id,
 	nvl(source, ${null_value}) as source,
 	dataset_id,
 	insertion_ts, 
-	wiki
+	wiki,
+        concat_ws(${found_on_delimiter}, found_on) as found_on
 from imagerec_prod 
 where wiki = '${hiveconf:wiki}' and snapshot='${hiveconf:snapshot}' and is_article_page=true
+

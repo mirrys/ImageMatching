@@ -47,6 +47,10 @@ algo_outputdir=runs/${run_id}/Output
 # Path on the local filesystem where production datasets will be stored.
 outputdir=runs/${run_id}/imagerec_prod_${snapshot}
 
+# Temporary directory where data collected from Hive during the 
+# production datasets export is stored.
+tsv_tmpdir=runs/${run_id}/tmp
+
 make venv
 source venv/bin/activate
 
@@ -134,10 +138,17 @@ echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 # 6. Export production datasets
 STARTIME=${SECONDS}
 mkdir ${outputdir}
+mkdir ${tsv_tmpdir}
 for wiki in ${poc_wikis}; do
-	hive -hiveconf username=${username} -hiveconf wiki=${wiki} -hiveconf snapshot=${monthly_snapshot} -f ddl/export_prod_data.hql > ${outputdir}/prod-${wiki}-${snapshot}-wd_image_candidates.tsv
+	# 1. First we collect data into a set of TSV files at location `output_path`.
+        #    And we save the header (the command output) to a temp _header file.
+        hive -hiveconf username=${username} -hiveconf output_path=${tsv_tmpdir}/${wiki}_${monthly_snapshot} -hiveconf wiki=${wiki} -hiveconf snapshot=${monthly_snapshot} -f ddl/export_prod_data.hql > ${tsv_tmpdir}/${wiki}_${monthly_snapshot}_header;
+        # .2 Then we append all TSV files to _header, and collect them into a single-file dataset.
+        cat ${tsv_tmpdir}/${wiki}_${monthly_snapshot}_header ${tsv_tmpdir}/${wiki}_${monthly_snapshot}/* > ${outputdir}/prod-${wiki}-${snapshot}-wd_image_candidates.tsv
 done
+rm -r ${tsv_tmpdir}
 ENDTIME=${SECONDS}
+
 echo "Datasets are available at $outputdir/"
 metric_name=metrics.etl.export_prod_data.${snapshot}.seconds
 timestamp=$(date +%s)

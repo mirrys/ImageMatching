@@ -23,8 +23,8 @@ PARTITIONED BY (
   `snapshot` string)
 STORED AS PARQUET
 LOCATION
-  'hdfs://analytics-hadoop/user/${hiveconf:username}/imagerec'
-TBLPROPERTIES ("skip.header.line.count"="1");
+  'hdfs://analytics-hadoop/user/${hiveconf:username}/imagerec';
 
 -- Update partition metadata
 MSCK REPAIR TABLE `imagerec`;
+

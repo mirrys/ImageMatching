@@ -19,7 +19,8 @@ CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
   `instance_of` string,
   `is_article_page` boolean,
   `dataset_id` string,
-  `insertion_ts` double)
+  `insertion_ts` double, 
+  `found_on` array<string>)
 PARTITIONED BY (`wiki` string, `snapshot` string)
 STORED AS PARQUET
 LOCATION
@@ -27,3 +28,4 @@ LOCATION
 
 -- Update partition metadata
 MSCK REPAIR TABLE `imagerec_prod`;
+

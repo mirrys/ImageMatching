@@ -1,6 +1,7 @@
 from etl.transform import ImageRecommendation
-
 from pyspark.sql import functions as F
+from pyspark import Row
+from conftest import assert_shallow_equals
 
 
 def test_etl(raw_data):
@@ -19,6 +20,7 @@ def test_etl(raw_data):
                     "instance_of",
                     "is_article_page",
                     "source",
+                    "found_on",
                 }
             )
         )
@@ -60,7 +62,7 @@ def test_etl(raw_data):
     )
     assert len(rows) == 1
     assert rows[0]["instance_of"] == expected_instance_of
-
+ 
     # Pages are correctly marked for filtering
     expected_page_id = "523523"
     filter_out_rows = (
@@ -71,3 +73,17 @@ def test_etl(raw_data):
     )
     assert len(filter_out_rows) == 1
     assert filter_out_rows[0]["page_id"] == expected_page_id
+
+def test_note_parsing(wikis, spark_session):
+    transformed_df = wikis.withColumn("found_on", ImageRecommendation.found_on).select(
+        "found_on"
+    )
+    expected_df = spark_session.createDataFrame(
+        [
+            Row(found_on=["ruwiki", "itwiki", "enwiki"]),
+            Row(found_on=[""]),
+            Row(found_on=None),
+        ]
+    )
+    assert_shallow_equals(transformed_df, expected_df)
+
