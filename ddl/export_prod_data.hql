@@ -1,8 +1,10 @@
 -- This script is used to export production datasets, 
 -- in a format consumable by the APIs.
 --
+-- Data is collected locally, in TSV format, under <output_path>.
+--
 -- Run with:
--- hive -hiveconf username=${username} -hiveconf wiki=${wiki} -hiveconf snapshot=${monthly_snapshot} -f export_prod_data.hql
+-- hive -hiveconf output_path=<output_path> -hiveconf username=${username} -hiveconf wiki=${wiki} -hiveconf snapshot=${monthly_snapshot} -f export_prod_data.hql
 --
 --
 -- Format
