@@ -4,6 +4,7 @@ from pyspark.sql import functions as F
 from pyspark.sql.types import IntegerType
 from schema import RawDataset
 from instances_to_filter import InstancesToFilter
+from images_to_filter import ImagesToFilter
 
 import argparse
 import uuid
@@ -139,9 +140,20 @@ if __name__ == "__main__":
 
     df = spark.read.schema(RawDataset.schema).parquet(source)
     insertion_ts = datetime.datetime.now().timestamp()
+    images_to_filter = ImagesToFilter(snapshot).get_placeholder_images()
+
+    is_placeholder_image: Column = (
+        F.when(
+            F.col("image_id").isin(images_to_filter),
+            F.lit(True)
+        )
+        .otherwise(False)
+    )
+
     (
         ImageRecommendation(df)
         .transform()
+        .withColumn("is_placeholder_image", is_placeholder_image)
         .withColumn("dataset_id", F.lit(dataset_id))
         .withColumn("insertion_ts", F.lit(insertion_ts))
         .withColumn("snapshot", F.lit(snapshot))

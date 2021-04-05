@@ -21,6 +21,7 @@ def test_etl(raw_data):
                     "is_article_page",
                     "source",
                     "found_on",
+                    "is_placeholder_image"
                 }
             )
         )
