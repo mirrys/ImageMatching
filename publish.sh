@@ -64,6 +64,15 @@ $(pwd)/runs/${run_id}"
 spark_config=runs/$run_id/regular.spark.properties
 cat conf/spark.properties.template /usr/lib/spark2/conf/spark-defaults.conf > ${spark_config}
 
+# Generate placeholder_images parquet file
+echo "Generating placeholder_image parquet file"
+STARTTIME=${SECONDS}
+python placeholder_images.py ${monthly_snapshot}
+ENDTIME=${SECONDS}
+metric_name=metrics.placeholder_images.${monthly_snapshot}.seconds
+timestamp=$(date +%s)
+echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+
 # TODO(gmodena, 2021-02-02): 
 # Passing one wiki at a time to get a feeling for runtime deltas (to some degree, we could get this info from parsing hdfs snapshots).
 # We could pass the whole list at algorunner.py at once,
