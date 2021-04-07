@@ -49,7 +49,9 @@ class PlaceholderImages:
                              AND mc.snapshot='""" + self.snapshot + """'
                              AND mc.wiki_db ='commonswiki'
                             """)
-        image_placeholders.coalesce(1).write.mode("overwrite").parquet("image_placeholders")
+
+        # Using repartition instead of coalesce because coalesce caused a spark memory error
+        image_placeholders.repartition(1).write.mode("overwrite").parquet("image_placeholders")
 
 
 if __name__ == "__main__":
@@ -63,3 +65,4 @@ if __name__ == "__main__":
     placeholder_images = PlaceholderImages(args.snapshot, args.username)
 
     placeholder_images.run()
+    spark.stop()
