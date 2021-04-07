@@ -67,7 +67,7 @@ cat conf/spark.properties.template /usr/lib/spark2/conf/spark-defaults.conf > ${
 # Generate placeholder_images parquet file
 echo "Generating placeholder_image parquet file"
 STARTTIME=${SECONDS}
-python placeholder_images.py ${monthly_snapshot}
+spark2-submit --properties-file ${spark_config} placeholder_images.py ${monthly_snapshot}
 ENDTIME=${SECONDS}
 metric_name=metrics.placeholder_images.${monthly_snapshot}.seconds
 timestamp=$(date +%s)
