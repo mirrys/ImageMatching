@@ -37,3 +37,4 @@ CREATE INDEX t_wiki_page_id ON t(wiki, page_id);
 .import imagerec_prod_${SNAPSHOT}/prod-trwiki-${SNAPSHOT}-wd_image_candidates.tsv t
 .import imagerec_prod_${SNAPSHOT}/prod-ukwiki-${SNAPSHOT}-wd_image_candidates.tsv t
 .import imagerec_prod_${SNAPSHOT}/prod-viwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+
