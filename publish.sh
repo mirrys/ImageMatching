@@ -51,6 +51,8 @@ tsv_tmpdir=runs/${run_id}/tmp
 
 make venv
 source venv/bin/activate
+wikis=${all_wikis}
+poc_wikis=${target_wikis}
 
 mkdir -p $(pwd)/runs/${run_id}/
 metrics_dir=$(pwd)/runs/${run_id}/metrics
