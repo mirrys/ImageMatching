@@ -103,3 +103,20 @@ and **output directory** (defaults to Output)
 cd dataset_metrics/
 python3 dataset_metrics_runner.py 2021-01 Output
 ```
+
+### Exporting datasets
+
+The following scripts export the datasets currently used by client teams.
+* `ddl/export_prod_data.hql` generates the canonical dataset for the `image-suggestions-api` service.
+* `ddl/export_prod_data-android.hql` generates an Android specific variant.
+
+A template is provided at `ddl/imagerec.sqlite.template` to ingest data into sqlite
+for testing and validation purposes. It's parametrized by a `SNAPSHOT` variable;
+an sqlite script (DDL and `.import`s) can be generated in Bash with:
+```{bash}
+export SNAPSHOT=2021-02-22
+eval "cat <<EOF
+$(cat imagerec.sqlite.template)
+EOF
+" 2> /dev/null
+```

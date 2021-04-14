@@ -1,0 +1,40 @@
+CREATE TABLE t(page_id INTEGER,
+	page_title TEXT,
+	image_id TEXT,
+	confidence_rating TEXT,
+	source TEXT,
+	dataset_id TEXT,
+	insertion_ts REAL,
+	wiki TEXT,
+	found_on TEXT);
+CREATE INDEX t_wiki_page_id ON t(wiki, page_id);
+
+.mode ascii
+.separator "\t" "\n"
+.timer on
+
+.import imagerec_prod_${SNAPSHOT}/prod-arwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-arzwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-bnwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-cebwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-cswiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-dewiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-enwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-eswiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-euwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-fawiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-frwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-hewiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-huwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-hywiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-itwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-kowiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-plwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-ptwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-ruwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-srwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-svwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-trwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-ukwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+.import imagerec_prod_${SNAPSHOT}/prod-viwiki-${SNAPSHOT}-wd_image_candidates.tsv t
+
