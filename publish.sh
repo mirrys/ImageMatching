@@ -30,16 +30,14 @@ snapshot=$1
 
 run_id=$(cat /proc/sys/kernel/random/uuid)
 
-
-# Target wikis to train ImageMatching on
-wikis="aawiki abwiki acewiki adywiki afwiki akwiki alswiki amwiki angwiki anwiki arcwiki arwiki arywiki arzwiki astwiki aswiki atjwiki avkwiki avwiki awawiki aywiki azbwiki azwiki banwiki barwiki bat_smgwiki bawiki bclwiki bewiki bgwiki bhwiki biwiki bjnwiki bmwiki bnwiki bowiki bpywiki brwiki bswiki bugwiki bxrwiki cawiki cdowiki cebwiki cewiki chowiki chrwiki chwiki chywiki ckbwiki cowiki crhwiki crwiki csbwiki cswiki cuwiki cvwiki cywiki dawiki dewiki dinwiki diqwiki donatewiki dsbwiki dtywiki dvwiki dzwiki eewiki elwiki emlwiki enwiki eowiki eswiki etwiki euwiki extwiki fawiki ffwiki fiu_vrowiki fiwiki fjwiki fowiki frpwiki frrwiki frwiki furwiki fywiki gagwiki ganwiki gawiki gcrwiki gdwiki glkwiki glwiki gnwiki gomwiki gorwiki gotwiki guwiki gvwiki hakwiki hawiki hawwiki hewiki hifwiki hiwiki howiki hrwiki hsbwiki htwiki huwiki hywiki hywwiki hzwiki iawiki idwiki iewiki igwiki iiwiki ikwiki ilowiki incubatorwiki inhwiki iowiki iswiki itwiki iuwiki jamwiki jawiki jbowiki jvwiki kaawiki kabwiki kawiki kbdwiki kbpwiki kgwiki kiwiki kjwiki kkwiki klwiki kmwiki knwiki koiwiki kowiki krcwiki krwiki kshwiki kswiki kuwiki kvwiki kwwiki kywiki ladwiki lawiki lbewiki lbwiki lezwiki lfnwiki lgwiki lijwiki liwiki lldwiki lmowiki lnwiki lowiki lrcwiki ltgwiki ltwiki lvwiki maiwiki map_bmswiki mdfwiki mediawikiwiki metawiki mgwiki mhrwiki mhwiki minwiki miwiki mkwiki mlwiki mnwiki mnwwiki mrjwiki mrwiki mswiki mtwiki muswiki mwlwiki myvwiki mywiki mznwiki nahwiki napwiki nawiki nds_nlwiki ndswiki newiki newwiki ngwiki nlwiki nnwiki novwiki nowiki nqowiki nrmwiki nsowiki nvwiki nywiki ocwiki olowiki omwiki orwiki oswiki pagwiki pamwiki papwiki pawiki pcdwiki pdcwiki pflwiki pihwiki piwiki plwiki pmswiki pnbwiki pntwiki pswiki ptwiki quwiki rmwiki rmywiki rnwiki roa_rupwiki roa_tarawiki rowiki ruewiki ruwiki rwwiki sahwiki satwiki sawiki scnwiki scowiki scwiki sdwiki sewiki sgwiki shnwiki shwiki simplewiki siwiki skwiki slwiki smwiki snwiki sourceswiki sowiki specieswiki sqwiki srnwiki srwiki sswiki stqwiki stwiki suwiki svwiki swwiki szlwiki szywiki tawiki tcywiki tenwiki test2wiki testwiki tetwiki tewiki tgwiki thwiki tiwiki tkwiki tlwiki tnwiki towiki tpiwiki trwiki tswiki ttwiki tumwiki twwiki tyvwiki tywiki udmwiki ugwiki ukwiki urwiki uzwiki vecwiki vepwiki vewiki viwiki vlswiki votewiki vowiki warwiki wawiki wowiki wuuwiki xalwiki xhwiki xmfwiki yiwiki yowiki zawiki zeawiki zh_classicalwiki zh_min_nanwiki zh_yuewiki zhwiki zuwiki"
-
-# wikis to export for PoC
-poc_wikis="enwiki arwiki kowiki cswiki viwiki frwiki fawiki ptwiki ruwiki trwiki plwiki hewiki svwiki ukwiki huwiki hywiki srwiki euwiki arzwiki cebwiki dewiki bnwiki eswiki itwiki"
-
 # YYYY-MM
 monthly_snapshot=$(echo ${snapshot} | awk -F'-' '{print $1"-"$2}')
 username=$(whoami)
+
+# Populate the script with `wiki` and `poc_wiki` variables.
+# Those vars hold a list of wikis to train on, and to export to PoC clients
+# respectively
+source conf/wiki.conf
 
 # Path were raw dataset (Jupyter algo output) will be stored
 algo_outputdir=runs/${run_id}/Output
@@ -53,6 +51,8 @@ tsv_tmpdir=runs/${run_id}/tmp
 
 make venv
 source venv/bin/activate
+wikis=${all_wikis}
+poc_wikis=${target_wikis}
 
 mkdir -p $(pwd)/runs/${run_id}/
 metrics_dir=$(pwd)/runs/${run_id}/metrics
