@@ -21,6 +21,8 @@ def test_etl(raw_data):
                     "is_article_page",
                     "source",
                     "found_on",
+                    "page_namespace",
+                    "recommendation_type"
                 }
             )
         )
@@ -73,6 +75,23 @@ def test_etl(raw_data):
     )
     assert len(filter_out_rows) == 1
     assert filter_out_rows[0]["page_id"] == expected_page_id
+
+    # page_namespace is correctly marked as 0 for all rows
+    assert (
+        ddf.where(F.col("page_namespace") == 0)
+        .select("page_namespace")
+        .count()
+        == expected_num_records
+    )
+
+    # recommendation_type is correctly marked as 'image' for all rows
+    assert (
+        ddf.where(F.col("recommendation_type") == 'image')
+        .select("recommendation_type")
+        .count()
+        ==
+        expected_num_records
+    )
 
 def test_note_parsing(wikis, spark_session):
     transformed_df = wikis.withColumn("found_on", ImageRecommendation.found_on).select(
