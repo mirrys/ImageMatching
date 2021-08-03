@@ -166,8 +166,8 @@ echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 #7. Create search table parquet file
 STARTTIME=${SECONDS}
 hdfs_search_imagerec=/user/${username}/search_imagerec
-spark2-submit --properties-file ${spark_config} --files etl/search_table.py \
-	--snapshot ${monthly_snapshot} \
+spark2-submit --properties-file ${spark_config} etl/search_table.py \
+	--snapshot ${snapshot} \
 	--source ${hdfs_imagerec_prod} \
 	--destination ${hdfs_search_imagerec}
 metric_name=metrics.etl.search_table.${snapshot}.second

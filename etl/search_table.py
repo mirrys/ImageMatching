@@ -10,7 +10,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Transform raw algo output to production datasets"
     )
-    parser.add_argument("--snapshot", help="Montlhy snapshot date (YYYY-MM)")
+    parser.add_argument("--snapshot", help="Monthly snapshot date (YYYY-MM-DD)")
     parser.add_argument("--source", help="Source dataset path")
     parser.add_argument("--destination", help="Destination path")
 
@@ -20,9 +20,12 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    snapshot = args.snapshot
+    snapshot = args.snapshot.split("-")
     source = args.source
     destination = args.destination
+    year = snapshot[0]
+    month = snapshot[1]
+    day = snapshot[2]
 
     num_partitions = 1
 
@@ -30,18 +33,25 @@ if __name__ == "__main__":
     (
         df
         .where(~F.col("image_id").isNull())
-        .where(F.col("is_article_page") is True)
+        .filter(F.col("is_article_page") == True)
         .withColumn("page_namespace", F.lit(0))
         .withColumn("recommendation_type", F.lit('image'))
+        .withColumn("year", F.lit(year))
+        .withColumn("month", F.lit(month))
+        .withColumn("day", F.lit(day))
         .withColumnRenamed("wiki", "wikiid")
+        .withColumn("page_id", df.page_id.cast('int'))
         .select(
             "wikiid",
             "page_id",
             "page_namespace",
-            "recommendation_type"
+            "recommendation_type",
+            "year",
+            "month",
+            "day"
         )
         .coalesce(num_partitions)
-        .write.partitionBy("snapshot")
+        .write.partitionBy("year", "month", "day")
         .mode("overwrite")  # Requires dynamic partitioning enabled
         .parquet(destination)
     )

@@ -15,7 +15,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS `search_imagerec`(
   `page_id` int,
   `page_namespace` int,
   `recommendation_type` string)
-PARTITIONED BY (`snapshot` string)
+PARTITIONED BY (`year` int, `month` int, `day` int)
 STORED AS PARQUET
 LOCATION
   'hdfs://analytics-hadoop/user/${hiveconf:username}/search_imagerec';
