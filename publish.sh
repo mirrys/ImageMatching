@@ -163,5 +163,24 @@ metric_name=metrics.etl.export_prod_data.${snapshot}.seconds
 timestamp=$(date +%s)
 echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
 
+#7. Create search table parquet file
+STARTTIME=${SECONDS}
+hdfs_search_imagerec=/user/${username}/search_imagerec
+spark2-submit --properties-file ${spark_config} --files etl/search_table.py \
+	--snapshot ${monthly_snapshot} \
+	--source ${hdfs_imagerec_prod} \
+	--destination ${hdfs_search_imagerec}
+metric_name=metrics.etl.search_table.${snapshot}.second
+timestamp=$(date +%s)
+echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+
+#8 Update hive external table metadata (search_table)
+STARTTIME=${SECONDS}
+hive -hiveconf username=${username} -f ddl/external_search_imagerec.hql
+ENDTIME=${SECONDS}
+metric_name=hive.search_imagerec.${snapshot}
+timestamp=$(date +%s)
+echo "${timestamp},$(($ENDTIME - $STARTTIME))" >> ${metrics_dir}/${metric_name}
+
 echo "Export summary"
 cut -f 3,4 ${outputdir}/*.tsv | sort -k 1,2 | uniq -c 

@@ -75,8 +75,6 @@ class ImageRecommendation:
             .withColumn("confidence_rating", self.confidence_rating)
             .withColumn("source", self.source)
             .withColumn("found_on", self.found_on)
-            .withColumn("page_namespace", F.lit(0))
-            .withColumn("recommendation_type", F.lit('image'))
             .select(
                 "wiki",
                 "page_id",
@@ -86,8 +84,6 @@ class ImageRecommendation:
                 "source",
                 "instance_of",
                 "found_on",
-                "page_namespace",
-                "recommendation_type"
             )
         )
         without_recommendations = (
@@ -97,8 +93,6 @@ class ImageRecommendation:
             .withColumn("confidence_rating", F.lit(None))
             .withColumn("source", F.lit(None))
             .withColumn("found_on", F.lit(None))
-            .withColumn("page_namespace", F.lit(0))
-            .withColumn("recommendation_type", F.lit('image'))
             .select(
                 "wiki",
                 "page_id",
@@ -108,8 +102,6 @@ class ImageRecommendation:
                 "source",
                 "instance_of",
                 "found_on",
-                "page_namespace",
-                "recommendation_type"
             )
         )
 

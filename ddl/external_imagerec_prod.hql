@@ -20,9 +20,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec_prod`(
   `is_article_page` boolean,
   `dataset_id` string,
   `insertion_ts` double, 
-  `found_on` array<string>,
-  `page_namespace` int,
-  `recommendation_type` string)
+  `found_on` array<string>)
 PARTITIONED BY (`wiki` string, `snapshot` string)
 STORED AS PARQUET
 LOCATION

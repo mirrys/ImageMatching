@@ -10,14 +10,11 @@
 -- hive -hiveconf username=<username> -f external_search_imagerec.hql
 USE ${hiveconf:username};
 
-CREATE EXTERNAL TABLE IF NOT EXISTS `search_imagerec` AS
-SELECT
-    wiki AS wikiid,
-    page_id,
-    page_namespace,
-    recommendation_type
-FROM imagerec_prod
-WHERE snapshot='${hiveconf:snapshot}' and is_article_page=true and image_id is not null
+CREATE EXTERNAL TABLE IF NOT EXISTS `search_imagerec`(
+  `wikiid` string,
+  `page_id` int,
+  `page_namespace` int,
+  `recommendation_type` string)
 PARTITIONED BY (`snapshot` string)
 STORED AS PARQUET
 LOCATION
