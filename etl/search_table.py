@@ -50,6 +50,7 @@ if __name__ == "__main__":
             "month",
             "day"
         )
+        .distinct()
         .coalesce(num_partitions)
         .write.partitionBy("year", "month", "day")
         .mode("overwrite")  # Requires dynamic partitioning enabled
