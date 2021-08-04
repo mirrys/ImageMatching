@@ -1,7 +1,7 @@
-spark_version := 2.4.7
+spark_version := 2.4.8
 hadoop_version := 2.7
 spark_home := spark-${spark_version}-bin-hadoop${hadoop_version}
-spark_tgz_url := http://apachemirror.wuchna.com/spark/spark-${spark_version}/${spark_home}.tgz
+spark_tgz_url := https://downloads.apache.org/spark/spark-${spark_version}/${spark_home}.tgz
 
 venv: requirements.txt
 	test -d venv || python3 -m venv venv

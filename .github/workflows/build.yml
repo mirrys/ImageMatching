@@ -28,11 +28,11 @@ jobs:
         java-version: adopt@1.8
     - name: Install Apache Spark
       run: |
-        # This command will install vanilla spark under ./spark-2.4.7-bin-hadoop2.7
+        # This command will install vanilla spark under ./spark-2.4.8-bin-hadoop2.7
         make install_spark
     - name: Test with pytest
       run: |
-        export SPARK_HOME=$(pwd)/spark-2.4.7-bin-hadoop2.7
+        export SPARK_HOME=$(pwd)/spark-2.4.8-bin-hadoop2.7
         export PYTHONPATH=${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip:${PYTHONPATH}
         export PATH=${PATH}:${SPARK_HOME}/bin:${SPARK_HOME}/sbin
         make test
