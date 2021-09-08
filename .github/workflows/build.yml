@@ -39,7 +39,9 @@ jobs:
     - name: Convert notebook to python script
       run: |
         make py
+        mkdir -p ima/scripts/
+        mv algorithm.py ima/scripts
     - uses: actions/upload-artifact@v2
       with:
-        name: algorithm.py
+        name: algorithm
         path: ima/scripts/algorithm.py
