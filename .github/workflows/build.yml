@@ -36,3 +36,10 @@ jobs:
         export PYTHONPATH=${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip:${PYTHONPATH}
         export PATH=${PATH}:${SPARK_HOME}/bin:${SPARK_HOME}/sbin
         make test
+    - name: Convert notebook to python script
+      run: |
+        make py
+    - uses: actions/upload-artifact@v2
+      with:
+        name: algorithm.py
+        path: ima/scripts/algorithm.py
