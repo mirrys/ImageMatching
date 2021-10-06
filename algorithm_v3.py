@@ -339,6 +339,7 @@ for wiki in languages:
     logger.info(f"Triggering qids_and_properties SQL for {wiki} {snapshot}")
     start_time = time.time()
     qid_props = spark.sql(queryd).cache()
+    qid_props.show()
     end_time = time.time()
     logger.info(f"Cached {qid_props.count()} rows qids_and_properties[{wiki}] in {end_time - start_time}s")
     qids_and_properties[wiki]=qid_props
@@ -543,6 +544,7 @@ for wiki in languages:
     logger.info("Applying UDFs on {qids_and_properties[wiki].count()} rows")
     start_time = time.time()
     df.cache()
+    df.show()
     end_time = time.time()
     logger.info(f"Applied UDFs in {end_time - start_time}s")
 
