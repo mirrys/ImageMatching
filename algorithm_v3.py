@@ -552,7 +552,6 @@ for wiki in languages:
     df.write.mode("overwrite").save(fname, format="parquet")
     end_time = time.time()
     logger.info(f"Saved {fname} in {end_time - start_time}s")
-    df.write.save(f'{wiki}_{snapshot}_wd_image_candidates_test', format="parquet")
 
 
 # In[ ]:
