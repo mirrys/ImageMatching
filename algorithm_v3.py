@@ -541,7 +541,7 @@ for wiki in languages:
 #         "wikidata_images",
         "top_candidates"
     )
-    logger.info("Applying UDFs on {qids_and_properties[wiki].count()} rows")
+    logger.info(f"Applying UDFs on {qids_and_properties[wiki].count()} rows")
     start_time = time.time()
     df.cache()
     df.show()
