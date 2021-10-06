@@ -47,7 +47,7 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
     
 # Pass in the full snapshot date
-snapshot = '2021-07-26'
+snapshot = '2021-09-20'
 
 # Allow the passing of a single language as a parameter
 language = 'kowiki'
