@@ -64,7 +64,7 @@ def test_etl(raw_data):
     assert rows[0]["instance_of"] == expected_instance_of
  
     # Pages are correctly marked for filtering
-    expected_page_id = "523523"
+    expected_page_id = 523523
     filter_out_rows = (
         ddf.where(~F.col("is_article_page"))
         .select("page_id")

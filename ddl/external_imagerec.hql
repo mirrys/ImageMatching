@@ -12,11 +12,10 @@
 USE ${hiveconf:username};
 
 CREATE EXTERNAL TABLE IF NOT EXISTS `imagerec` (
-  `pandas_idx` string,
   `item_id` string,
-  `page_id` string,
+  `page_id` bigint,
   `page_title` string,
-  `top_candidates` string,
+  `top_candidates` array<map<string, string>>,
   `instance_of` string)
 PARTITIONED BY (
   `wiki_db` string,

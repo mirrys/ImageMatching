@@ -62,11 +62,11 @@ class ImageRecommendation:
 
     def transform(self) -> DataFrame:
         with_recommendations = (
-            self.dataFrame.where(~F.col("top_candidates").isNull())
+            self.dataFrame.where(F.size(F.col("top_candidates")) > 0)
             .withColumn(
                 "data",
                 F.explode(
-                    F.from_json("top_candidates", RawDataset.top_candidates_schema)
+                    "top_candidates"
                 ),
             )
             .select("*", "data.image", "data.rating", "data.note")
@@ -87,7 +87,7 @@ class ImageRecommendation:
             )
         )
         without_recommendations = (
-            self.dataFrame.where(F.col("top_candidates").isNull())
+            self.dataFrame.where(F.size(F.col("top_candidates")) == 0)
             .withColumnRenamed("wiki_db", "wiki")
             .withColumn("image_id", F.lit(None))
             .withColumn("confidence_rating", F.lit(None))
