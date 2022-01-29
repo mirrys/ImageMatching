@@ -2,6 +2,7 @@ spark_version := 2.4.8
 hadoop_version := 2.7
 spark_home := spark-${spark_version}-bin-hadoop${hadoop_version}
 spark_tgz_url := https://downloads.apache.org/spark/spark-${spark_version}/${spark_home}.tgz
+ima_notebook := algorithm.ipynb
 
 venv: requirements.txt
 	test -d venv || python3 -m venv venv
@@ -21,3 +22,7 @@ flake8:	venv
 
 test:	venv
 	. venv/bin/activate; PYTHONPATH=${PYTHONPATH}:etl/ pytest --cov etl tests/
+
+py:	venv
+	# nbconvert output is saved as <basename>.py
+	. venv/bin/activate; jupyter nbconvert ${ima_notebook} --to script
